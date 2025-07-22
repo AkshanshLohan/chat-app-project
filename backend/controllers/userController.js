@@ -55,7 +55,7 @@ dotenv.config();
       }
       const isPasswordMatch=await bcrypt.compare(password,user.password);
       if(isPasswordMatch){
-        const tokenData={userID:user._id }
+        const tokenData={userId:user._id }
         const token=await JWT.sign(tokenData,process.env.JWT_SECRET_KEY,{expiresIn:'1d'});
 
         return res.status(200).cookie("token",token,{maxAge:1*24*60*60*1000,httpOnly:true,sameSite:'strict'}).json({
@@ -87,8 +87,19 @@ dotenv.config();
       console.log(error);
    }
  }
+ const getOtherUsers=async (req,res)=>{
+   try{
+      const loggedInUserId=req.id;
+      const otherUsers=await User.find({_id:{$ne: loggedInUserId}}).select("-password");
+      return res.status(200).json(otherUsers);
+   }
+   catch(error){
+      console.log(error);
+   }
+ }
  module.exports={
     register,
     login,
-    logout
+    logout,
+    getOtherUsers
  };
